@@ -1,0 +1,36 @@
+# http://www.appveyor.com/docs/appveyor-yml
+os: Windows Server 2012
+
+environment:
+  matrix:
+    # Pre-installed Python versions, which Appveyor may upgrade to a later point release.
+    # See: http://www.appveyor.com/docs/installed-software#python
+    - PYTHON: C:\Python26
+    - PYTHON: C:\Python26-x64
+    - PYTHON: C:\Python27
+    - PYTHON: C:\Python27-x64
+    - PYTHON: C:\Python33
+    - PYTHON: C:\Python33-x64
+    - PYTHON: C:\Python34
+    - PYTHON: C:\Python34-x64
+    - PYTHON: C:\Python35
+    - PYTHON: C:\Python35-x64
+
+# Makes AppVeyor give up all builds as soon as any of the builds fails
+matrix:
+  fast_finish: true
+
+install:
+  # By default, all script lines are interpreter as batch
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;
+  - set PATH=%PATH%;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;C:\Program Files\Mercurial;
+  - set PATH=%PATH%;C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent
+
+  # Check that we have the expected version and architecture for Python
+  - "python --version"
+  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - "pip install tox"
+
+# See https://github.com/scikit-learn/scikit-learn/blob/master/appveyor.yml for inspiration
+build_script:
+  - tox -e %TOX_ENV%
